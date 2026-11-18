@@ -5,11 +5,20 @@ import worker from "../src/index.js";
 const H = "X-STTPS-Fallback";
 const html = { Accept: "text/html" };
 let passed = 0;
-async function t(name, fn) { await fn(); passed++; console.log("ok -", name); }
-const stubFetch = (impl) => { globalThis.fetch = impl; };
+async function t(name, fn) {
+  await fn();
+  passed++;
+  console.log("ok -", name);
+}
+const stubFetch = (impl) => {
+  globalThis.fetch = impl;
+};
 
 await t("typo host gets the 503 maintenance page", async () => {
-  const r = await worker.fetch(new Request("https://zz-typo-123.sttps.co/x", { headers: html }), {});
+  const r = await worker.fetch(
+    new Request("https://zz-typo-123.sttps.co/x", { headers: html }),
+    {},
+  );
   assert.equal(r.status, 503);
   assert.equal(r.headers.get(H), "unknown-host");
   assert.equal(r.headers.get("Retry-After"), "300");
@@ -19,7 +28,13 @@ await t("typo host gets the 503 maintenance page", async () => {
 });
 
 await t("JSON / API request gets a JSON 503", async () => {
-  const r = await worker.fetch(new Request("https://api-typo.sttps.co/v1", { method: "POST", headers: { Accept: "application/json" } }), {});
+  const r = await worker.fetch(
+    new Request("https://api-typo.sttps.co/v1", {
+      method: "POST",
+      headers: { Accept: "application/json" },
+    }),
+    {},
+  );
   assert.equal(r.status, 503);
   assert.match(r.headers.get("Content-Type"), /application\/json/);
   assert.equal((await r.json()).error, "maintenance");
