@@ -1,0 +1,14 @@
+{
+  "$schema": "../STTPS-Website/node_modules/wrangler/config-schema.json",
+  "name": "sttps-maintenance",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  // Catches proxied (orange cloud) hostnames on sttps.co. DNS-only (grey cloud) records bypass
+  // Cloudflare entirely and never reach this Worker. See src/index.js for how each host is handled.
+  "routes": [
+    { "pattern": "*.sttps.co/*", "zone_name": "sttps.co" }
+  ],
+  "observability": { "enabled": true }
+}
